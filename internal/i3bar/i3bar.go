@@ -29,7 +29,10 @@ func (b *I3bar) Initialise() error {
 func (b *I3bar) Emit(generators []BlockGenerator) error {
 	var blocks []*Block
 	for _, generator := range generators {
-		b, err := generator.Block()
+		b, err := generator.Block(&ColorSet{
+			Bad:     &Color{255, 0, 0},
+			Warning: &Color{0, 0, 255},
+		})
 		if err != nil {
 			return err
 		}
@@ -78,5 +81,5 @@ type Block struct {
 }
 
 type BlockGenerator interface {
-	Block() (*Block, error)
+	Block(*ColorSet) (*Block, error)
 }

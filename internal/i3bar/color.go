@@ -8,6 +8,12 @@ import (
 	"strings"
 )
 
+type ColorSet struct {
+	Bad     *Color
+	Warning *Color
+	Good    *Color
+}
+
 type Color struct {
 	R, G, B uint8
 }
