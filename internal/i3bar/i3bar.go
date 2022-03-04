@@ -30,8 +30,8 @@ func (b *I3bar) Emit(generators []BlockGenerator) error {
 	var blocks []*Block
 	for _, generator := range generators {
 		b, err := generator.Block(&ColorSet{
-			Bad:     &Color{255, 0, 0},
-			Warning: &Color{0, 0, 255},
+			Bad:     &Color{251, 73, 52},
+			Warning: &Color{250, 189, 47},
 		})
 		if err != nil {
 			return err
