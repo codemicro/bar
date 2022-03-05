@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/codemicro/bar/internal/i3bar"
@@ -25,7 +27,7 @@ func run() error {
 	blocks := []i3bar.BlockGenerator{
 		providers.NewBattery("BAT0", 30, 15),
 		providers.NewDisk("/", 30, 10),
-		providers.NewCPU(10, 20),
+		providers.NewCPU(20, 50),
 		providers.NewMemory(),
 		providers.NewPulseaudioVolume(),
 		providers.NewDateTime(),
@@ -36,12 +38,18 @@ func run() error {
 	}
 
 	ticker := time.NewTicker(time.Second * 5)
+	sigUpdate := make(chan os.Signal, 1)
+
+	signal.Notify(sigUpdate, syscall.SIGUSR1)
 
 	for {
 		select {
+		case <-sigUpdate:
+			if err := b.Emit(blocks); err != nil {
+				return err
+			}
 		case <-ticker.C:
-			err := b.Emit(blocks)
-			if err != nil {
+			if err := b.Emit(blocks); err != nil {
 				return err
 			}
 		}
@@ -49,3 +57,4 @@ func run() error {
 }
 
 // TODO: Accept signals to refresh
+// TODO: Spotify provider!
