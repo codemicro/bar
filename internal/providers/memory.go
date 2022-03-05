@@ -11,11 +11,15 @@ import (
 )
 
 type Memory struct {
-	OkThreshold float32
+	OkThreshold      float32
+	WarningThreshold float32
 }
 
-func NewMemory() i3bar.BlockGenerator {
-	return new(Memory)
+func NewMemory(okThreshold, warningThreshold float32) i3bar.BlockGenerator {
+	return &Memory{
+		OkThreshold:      okThreshold,
+		WarningThreshold: warningThreshold,
+	}
 }
 
 var (
@@ -60,6 +64,7 @@ func (g *Memory) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 	if err != nil {
 		return nil, err
 	}
+	avail := total - used
 
 	// TODO: Make the readout change between KB/MB/GB
 
@@ -69,8 +74,10 @@ func (g *Memory) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 		ShortText: fmt.Sprintf("M: %.1fGB", used),
 	}
 
-	if total - used < g.OkThreshold && g.OkThreshold != 0 {
+	if avail < g.WarningThreshold && g.WarningThreshold != 0 {
 		block.TextColor = colors.Bad
+	} else if avail < g.OkThreshold && g.OkThreshold != 0 {
+		block.TextColor = colors.Warning
 	}
 
 	return block, nil

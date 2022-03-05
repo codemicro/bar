@@ -28,7 +28,7 @@ func run() error {
 		providers.NewBattery("BAT0", 30, 15),
 		providers.NewDisk("/", 30, 10),
 		providers.NewCPU(20, 50),
-		providers.NewMemory(),
+		providers.NewMemory(7, 5),
 		providers.NewPulseaudioVolume(),
 		providers.NewDateTime(),
 	}
