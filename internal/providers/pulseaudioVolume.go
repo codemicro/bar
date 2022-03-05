@@ -57,13 +57,13 @@ func (g *PulseaudioVolume) getVolume(info string) (*volumeInfo, error) {
 				return nil, fmt.Errorf("could not parse volumes from sink %s", name[1])
 			}
 
-			vl, err := strconv.ParseInt(volumes[1], 10, 8)
+			vl, err := strconv.ParseInt(volumes[1], 10, 32)
 			if err != nil {
 				return nil, err
 			}
 			v.Left = int(vl)
 
-			vr, err := strconv.ParseInt(volumes[2], 10, 8)
+			vr, err := strconv.ParseInt(volumes[2], 10, 32)
 			if err != nil {
 				return nil, err
 			}
