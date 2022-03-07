@@ -2,7 +2,9 @@ package i3bar
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
+	"os"
 )
 
 type I3bar struct {
@@ -26,15 +28,21 @@ func (b *I3bar) Initialise() error {
 	return err
 }
 
+var defaultColorSet = &ColorSet{
+	Bad:     &Color{251, 73, 52},
+	Warning: &Color{250, 189, 47},
+}
+
 func (b *I3bar) Emit(generators []BlockGenerator) error {
 	var blocks []*Block
 	for _, generator := range generators {
-		b, err := generator.Block(&ColorSet{
-			Bad:     &Color{251, 73, 52},
-			Warning: &Color{250, 189, 47},
-		})
+		b, err := generator.Block(defaultColorSet)
 		if err != nil {
-			return err
+			fmt.Fprintf(os.Stderr, "Warning: Error when running %T block generator: %v\n", generator, err)
+			b = &Block{
+				FullText: "ERROR",
+				TextColor: defaultColorSet.Bad,
+			}
 		}
 		blocks = append(blocks, b)
 	}
