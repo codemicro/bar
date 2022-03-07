@@ -25,7 +25,7 @@ func NewDisk(mountPath string, okThreshold, warningThreshold float32) i3bar.Bloc
 }
 
 func (g *Disk) getAvailable() (float32, error) {
-	cmdout, err := runCommand("df")
+	cmdout, err := runCommand("df", "-x", "fuse.portal")
 	if err != nil {
 		return 0, err
 	}
