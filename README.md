@@ -4,7 +4,7 @@
 
 ---
 
-This is a i3wm status bar that's build as a toy project. It is extremely basic, doesn't have many features and isn't very configurable.
+This is a i3wm status bar that's build as a toy project. It's pretty basic, doesn't have many features and isn't very configurable.
 
 This interacts with i3 using the [i3bar input protocol](https://i3wm.org/docs/i3bar-protocol.html).
 
@@ -16,7 +16,7 @@ This interacts with i3 using the [i3bar input protocol](https://i3wm.org/docs/i3
 
 ### Compiling locally
 
-These instructions assume you have a recent version of the Go 1.x toolchain installed on your machine.
+These instructions assume you have a recent version of the Go 1.18 (or newer) toolchain installed on your machine.
 
 ```
 git clone https://github.com/codemicro/bar.git
@@ -26,10 +26,16 @@ go build -o cdmbar github.com/codemicro/bar/cmd/bar
 mv ./cdmbar ~/.local/bin
 ```
 
-Then, update the `status_command` line below to match the below.
+### Using with i3wm
+
+Update the `status_command` line in your i3wm config file to match the below.
 
 ```
 bar {
         status_command cdmbar
 }
 ```
+
+### Changing options
+
+Edit the `blocks` variable inside of `cmd/bar/main.go`.
