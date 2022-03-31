@@ -11,6 +11,7 @@ import (
 )
 
 type Battery struct {
+	FullThreshold    float32
 	OkThreshold      float32
 	WarningThreshold float32
 
@@ -18,9 +19,10 @@ type Battery struct {
 	UseDesignMaxEnergy bool
 }
 
-func NewBattery(name string, okThreshold, warningThreshold float32) i3bar.BlockGenerator {
+func NewBattery(name string, fullThreshold, okThreshold, warningThreshold float32) i3bar.BlockGenerator {
 	return &Battery{
 		Name:             name,
+		FullThreshold:    fullThreshold,
 		OkThreshold:      okThreshold,
 		WarningThreshold: warningThreshold,
 	}
@@ -113,6 +115,14 @@ func (g *Battery) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 		block.TextColor = colors.Bad
 	} else if percentage < g.OkThreshold && g.OkThreshold != 0 {
 		block.TextColor = colors.Warning
+	}
+
+	if state == "CHR" {
+		if percentage > g.FullThreshold && g.FullThreshold != 0 {
+			block.TextColor = colors.Good
+		} else {
+			block.TextColor = nil // set to white
+		}
 	}
 
 	return block, nil

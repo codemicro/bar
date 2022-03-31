@@ -25,7 +25,7 @@ func run() error {
 	}
 
 	blocks := []i3bar.BlockGenerator{
-		providers.NewBattery("BAT0", 30, 15),
+		providers.NewBattery("BAT0", 80, 30, 20),
 		providers.NewDisk("/", 30, 10),
 		providers.NewCPU(20, 50),
 		providers.NewMemory(7, 5),
@@ -56,5 +56,4 @@ func run() error {
 	}
 }
 
-// TODO: Accept signals to refresh
 // TODO: Spotify provider!

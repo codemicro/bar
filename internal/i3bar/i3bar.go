@@ -29,6 +29,7 @@ func (b *I3bar) Initialise() error {
 }
 
 var defaultColorSet = &ColorSet{
+	Good:    &Color{0xb8, 0xbb, 0x26},
 	Bad:     &Color{251, 73, 52},
 	Warning: &Color{250, 189, 47},
 }
