@@ -25,6 +25,8 @@ func run() error {
 	}
 
 	blocks := []i3bar.BlockGenerator{
+		providers.NewIPAddress("wlp0s20f3"),
+		providers.NewWiFi("wlp0s20f3", 75),
 		providers.NewBattery("BAT0", 80, 30, 20),
 		providers.NewDisk("/", 30, 10),
 		providers.NewCPU(20, 50),
