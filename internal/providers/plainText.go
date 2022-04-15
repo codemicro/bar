@@ -14,7 +14,7 @@ func NewPlainText(text string) i3bar.BlockGenerator {
 
 func (g *PlainText) Block(*i3bar.ColorSet) (*i3bar.Block, error) {
 	return &i3bar.Block{
-		Name: "plaintext",
+		Name:     "plaintext",
 		FullText: g.Text,
 	}, nil
 }

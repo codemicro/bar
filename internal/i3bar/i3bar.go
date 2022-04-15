@@ -41,7 +41,7 @@ func (b *I3bar) Emit(generators []BlockGenerator) error {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Warning: Error when running %T block generator: %v\n", generator, err)
 			b = &Block{
-				FullText: "ERROR",
+				FullText:  "ERROR",
 				TextColor: defaultColorSet.Bad,
 			}
 		}

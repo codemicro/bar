@@ -11,13 +11,13 @@ import (
 )
 
 type WiFi struct {
-	Adapter string
+	Adapter     string
 	OkThreshold float32
 }
 
 func NewWiFi(adapter string, okThreshold float32) i3bar.BlockGenerator {
 	return &WiFi{
-		Adapter: adapter,
+		Adapter:     adapter,
 		OkThreshold: okThreshold,
 	}
 }
