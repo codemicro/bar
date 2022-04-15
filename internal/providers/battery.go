@@ -131,7 +131,9 @@ func (g *Battery) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 		if percentage > g.FullThreshold && g.FullThreshold != 0 {
 			block.TextColor = colors.Good
 		} else {
-			block.TextColor = nil // set to white
+			// Set text/background color to white
+			block.BackgroundColor = nil
+			block.TextColor = nil
 		}
 	}
 
