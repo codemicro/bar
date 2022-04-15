@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"runtime/debug"
 	"syscall"
 	"time"
 
@@ -24,6 +25,17 @@ func run() error {
 		return err
 	}
 
+	commitHash := getCommitHash()
+	if commitHash != "" {
+		commitHash = " " + commitHash
+	}
+
+	if err := b.Emit([]i3bar.BlockGenerator{
+		providers.NewPlainText("cdmbar" + commitHash),
+	}); err != nil {
+		return err
+	}
+
 	blocks := []i3bar.BlockGenerator{
 		providers.NewIPAddress("wlp0s20f3"),
 		providers.NewWiFi("wlp0s20f3", 75),
@@ -35,14 +47,15 @@ func run() error {
 		providers.NewDateTime(),
 	}
 
-	if err := b.Emit(blocks); err != nil {
-		return err
-	}
-
 	ticker := time.NewTicker(time.Second * 5)
 	sigUpdate := make(chan os.Signal, 1)
 
 	signal.Notify(sigUpdate, syscall.SIGUSR1)
+
+	go func() {
+		time.Sleep(time.Millisecond * 1000)
+		sigUpdate <- os.Signal(syscall.SIGUSR1)
+	}()
 
 	for {
 		select {
@@ -59,3 +72,21 @@ func run() error {
 }
 
 // TODO: Spotify provider!
+
+func getCommitHash() string {
+	bi, ok := debug.ReadBuildInfo()
+	if !ok {
+		return ""
+	}
+
+	var hash string
+
+	for _, setting := range bi.Settings {
+		if setting.Key == "vcs.revision" {
+			hash = setting.Value[0:7]
+			break
+		}
+	}
+
+	return hash
+}
