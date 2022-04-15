@@ -4,7 +4,7 @@
 
 ---
 
-This is a i3wm status bar that's build as a toy project. It's pretty basic, doesn't have many features and isn't very configurable.
+This is a i3wm status bar that's built as a toy project. It's pretty basic, doesn't have many features and isn't very configurable unless you want to edit the source and recompile it.
 
 This interacts with i3 using the [i3bar input protocol](https://i3wm.org/docs/i3bar-protocol.html).
 
@@ -16,7 +16,7 @@ This interacts with i3 using the [i3bar input protocol](https://i3wm.org/docs/i3
 
 ### Compiling locally
 
-These instructions assume you have a recent version of the Go 1.18 (or newer) toolchain installed on your machine.
+These instructions assume you have a recent version of the Go 1.18 (or newer) toolchain installed on your machine. `cdmbar` includes some stuff that works with the VCS stamping introduced in Go 1.18, however you can compile with `-buildvcs=false` and everything should still work fine.
 
 ```
 git clone https://github.com/codemicro/bar.git
