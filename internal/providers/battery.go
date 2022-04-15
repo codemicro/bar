@@ -115,7 +115,7 @@ func (g *Battery) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 
 	if percentage < g.WarningThreshold && g.WarningThreshold != 0 {
 
-		if g.previousWasBackgroundWarning {
+		if g.previousWasBackgroundWarning || state == "CHR" { // disable flashing when on charge
 			block.TextColor = colors.Bad
 		} else {
 			block.BackgroundColor = colors.Bad
