@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"os"
+
+	"github.com/rs/zerolog/log"
 )
 
 type I3bar struct {
@@ -39,7 +40,7 @@ func (b *I3bar) Emit(generators []BlockGenerator) error {
 	for _, generator := range generators {
 		b, err := generator.Block(defaultColorSet)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Warning: Error when running %T block generator: %v\n", generator, err)
+			log.Error().Err(err).Str("generator", fmt.Sprintf("%T", generator)).Send()
 			b = &Block{
 				FullText:  "ERROR",
 				TextColor: defaultColorSet.Bad,

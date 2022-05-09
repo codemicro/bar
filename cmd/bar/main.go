@@ -1,21 +1,35 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
+	"path"
 	"runtime/debug"
 	"syscall"
 	"time"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"gopkg.in/natefinch/lumberjack.v2"
 
 	"github.com/codemicro/bar/internal/i3bar"
 	"github.com/codemicro/bar/internal/providers"
 )
 
 func main() {
+	logFileName := "cdmbar.log"
+	if userHomeDir, err := os.UserHomeDir(); err == nil {
+		logFileName = path.Join(userHomeDir, logFileName)
+	}
+
+	log.Logger = log.Logger.Output(zerolog.MultiLevelWriter(os.Stderr, &lumberjack.Logger{
+		Filename: logFileName,
+		MaxSize:  1,  // MB
+		MaxAge:   14, // days
+	})).Level(zerolog.ErrorLevel)
+
 	if err := run(); err != nil {
-		fmt.Fprintln(os.Stderr, "Unhandled error:", err)
-		os.Exit(1)
+		log.Fatal().Err(err).Msg("unhandled error")
 	}
 }
 
@@ -53,6 +67,7 @@ func run() error {
 	signal.Notify(sigUpdate, syscall.SIGUSR1)
 
 	go func() {
+		// hacky thing to force an update in a second so we can clear the "cdmbar <VERSION>" readout
 		time.Sleep(time.Millisecond * 1000)
 		sigUpdate <- os.Signal(syscall.SIGUSR1)
 	}()
@@ -89,4 +104,12 @@ func getCommitHash() string {
 	}
 
 	return hash
+}
+
+func ignoreError[T any](x T, err error) T {
+	if err != nil {
+		var y T
+		return y
+	}
+	return x
 }
