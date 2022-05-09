@@ -10,6 +10,13 @@ import (
 	"github.com/codemicro/bar/internal/i3bar"
 )
 
+const (
+	batteryStateFull = "FULL"
+	batteryStateDischarging = "BAT"
+	batteryStateCharging = "CHR"
+	batteryStateUnknown = "UNK"
+)
+
 type Battery struct {
 	FullThreshold    float32
 	OkThreshold      float32
@@ -81,15 +88,15 @@ func (g *Battery) getState() (string, error) {
 
 	switch strings.TrimSpace(string(sa)) {
 	case "Full":
-		x = "FULL"
+		x = batteryStateFull
 	case "Discharging":
-		x = "BAT"
+		x = batteryStateDischarging
 	case "Charging":
-		x = "CHR"
+		x = batteryStateCharging
 	case "Unknown":
 		fallthrough
 	default:
-		x = "UNK"
+		x = batteryStateUnknown
 	}
 
 	return x, nil
@@ -115,7 +122,7 @@ func (g *Battery) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 
 	if percentage < g.WarningThreshold && g.WarningThreshold != 0 {
 
-		if g.previousWasBackgroundWarning || state == "CHR" { // disable flashing when on charge
+		if g.previousWasBackgroundWarning || state == batteryStateCharging { // disable flashing when on charge
 			block.TextColor = colors.Bad
 		} else {
 			block.BackgroundColor = colors.Bad
@@ -128,7 +135,7 @@ func (g *Battery) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 	}
 
 	switch state {
-	case "CHR":
+	case batteryStateCharging:
 		if percentage > g.FullThreshold && g.FullThreshold != 0 {
 			block.TextColor = colors.Good
 		} else {
@@ -136,10 +143,10 @@ func (g *Battery) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 			block.BackgroundColor = nil
 			block.TextColor = nil
 		}
-	case "FULL":
+	case batteryStateFull:
 		block.BackgroundColor = colors.Warning
 		block.TextColor = colors.Background
-	case "UNK":
+	case batteryStateUnknown:
 		block.TextColor = colors.Warning
 	}
 
