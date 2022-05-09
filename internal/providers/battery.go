@@ -138,6 +138,7 @@ func (g *Battery) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 		}
 	case "FULL":
 		block.BackgroundColor = colors.Warning
+		block.TextColor = colors.Background
 	case "UNK":
 		block.TextColor = colors.Warning
 	}

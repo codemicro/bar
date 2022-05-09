@@ -9,9 +9,10 @@ import (
 )
 
 type ColorSet struct {
-	Bad     *Color
-	Warning *Color
-	Good    *Color
+	Bad        *Color
+	Warning    *Color
+	Good       *Color
+	Background *Color
 }
 
 type Color struct {
