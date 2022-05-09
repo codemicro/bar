@@ -105,11 +105,3 @@ func getCommitHash() string {
 
 	return hash
 }
-
-func ignoreError[T any](x T, err error) T {
-	if err != nil {
-		var y T
-		return y
-	}
-	return x
-}
