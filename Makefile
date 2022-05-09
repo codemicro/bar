@@ -1,10 +1,11 @@
 .PHONY: clean install uninstall run
 
 install_dir := ~/.local/bin
+go_exe := go
 
 bin/cdmbar:
-	mkdir bin
-	go build -o bin/cdmbar github.com/codemicro/bar/cmd/bar
+	mkdir -p bin
+	$(go_exe) build $(go_args) -o bin/cdmbar github.com/codemicro/bar/cmd/bar
 
 run: bin/cdmbar
 	./bin/cdmbar
