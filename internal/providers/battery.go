@@ -127,7 +127,8 @@ func (g *Battery) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 		block.TextColor = colors.Warning
 	}
 
-	if state == "CHR" {
+	switch state {
+	case "CHR":
 		if percentage > g.FullThreshold && g.FullThreshold != 0 {
 			block.TextColor = colors.Good
 		} else {
@@ -135,6 +136,10 @@ func (g *Battery) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 			block.BackgroundColor = nil
 			block.TextColor = nil
 		}
+	case "FULL":
+		block.BackgroundColor = colors.Warning
+	case "UNK":
+		block.TextColor = colors.Warning
 	}
 
 	return block, nil
