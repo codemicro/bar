@@ -23,7 +23,9 @@ git clone https://github.com/codemicro/bar.git
 cd bar
 // Will install cdmbar to ~/.local/bin - to use it with i3, we need to put it on PATH
 make clean install
+
 // You can customise the install directory using `make install_dir=/usr/local/bin clean install`
+// You can build without VCS stamping using `make go_args="-buildvcs=false" clean install`
 ```
 
 ### Using with i3wm
