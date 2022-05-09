@@ -5,7 +5,7 @@ go_exe := go
 
 bin/cdmbar:
 	mkdir -p bin
-	$(go_exe) build $(go_args) -o bin/cdmbar github.com/codemicro/bar/cmd/bar
+	$(go_exe) build $(build_args) -o bin/cdmbar github.com/codemicro/bar/cmd/bar
 
 run: bin/cdmbar
 	./bin/cdmbar

@@ -27,7 +27,7 @@ cd bar
 make clean install
 
 // You can customise the install directory using `make install_dir=/usr/local/bin clean install`
-// You can build without VCS stamping using `make go_args="-buildvcs=false" clean install`
+// You can build without VCS stamping using `make build_args="-buildvcs=false" clean install`
 ```
 
 ### Using with i3wm
