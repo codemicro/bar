@@ -1,5 +1,7 @@
 .PHONY: clean install uninstall run
 
+install_dir := ~/.local/bin
+
 bin/cdmbar:
 	mkdir bin
 	go build -o bin/cdmbar github.com/codemicro/bar/cmd/bar
@@ -11,7 +13,7 @@ clean:
 	rm -rf bin
 
 install: bin/cdmbar
-	cp bin/cdmbar ~/.local/bin
+	cp bin/cdmbar $(install_dir)
 
 uninstall:
-	rm ~/.local/bin/cdmbar
+	rm $(install_dir)/cdmbar
