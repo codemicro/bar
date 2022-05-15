@@ -1,6 +1,7 @@
 package providers
 
 import (
+	"bytes"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -12,5 +13,5 @@ func runCommand(program string, args ...string) ([]byte, error) {
 	if err != nil {
 		err = fmt.Errorf(`failed to execute "%v" (%+v)`, strings.Join(append([]string{program}, args...), " "), err)
 	}
-	return out, err
+	return bytes.TrimSpace(out), err
 }
