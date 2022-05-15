@@ -81,6 +81,13 @@ func (g *AudioPlayer) getInfo() (*playingAudioInfo, error) {
 	return info, nil
 }
 
+func (g *AudioPlayer) TrimString(x string) string {
+	if len(x) > g.MaxLabelLen {
+		x = x[:g.MaxLabelLen] + "..."
+	}
+	return x
+}
+
 func (g *AudioPlayer) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 	info, err := g.getInfo()
 	if err != nil {
@@ -91,13 +98,11 @@ func (g *AudioPlayer) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 	b.Name = "audioPlayer"
 
 	b.FullText = musicNoteString
+	b.ShortText = musicNoteString
 
 	if info.Status == playerStatusPlaying || (info.Status == playerStatusPaused && g.ShowTextOnPause) {
-		x := fmt.Sprintf("%s - %s", info.Track, info.Artist)
-		if len(x) > g.MaxLabelLen {
-			x = x[:g.MaxLabelLen] + "..."
-		}
-		b.FullText += " " + x
+		b.ShortText += " " + g.TrimString(info.Track)
+		b.FullText += " " + g.TrimString(fmt.Sprintf("%s - %s", info.Track, info.Artist))
 	}
 
 	return b, nil
