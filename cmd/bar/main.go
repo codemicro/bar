@@ -87,8 +87,6 @@ func run() error {
 	}
 }
 
-// TODO: Spotify provider!
-
 func getCommitHash() string {
 	bi, ok := debug.ReadBuildInfo()
 	if !ok {
