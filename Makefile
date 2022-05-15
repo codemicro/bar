@@ -7,7 +7,7 @@ bin/cdmbar:
 	mkdir -p bin
 	$(go_exe) build $(build_args) -o bin/cdmbar github.com/codemicro/bar/cmd/bar
 
-run: bin/cdmbar
+run: clean bin/cdmbar
 	./bin/cdmbar
 
 clean:
