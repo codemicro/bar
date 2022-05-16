@@ -18,11 +18,13 @@ This interacts with i3 using the [i3bar input protocol](https://i3wm.org/docs/i3
 
 These instructions assume you have a recent version of the Go 1.18 (or newer) toolchain installed on your machine and a copy of GNU Make.
 
-`cdmbar` includes some stuff that works with the VCS stamping introduced in Go 1.18, however you can compile with `-buildvcs=false` and everything should still work fine.
+`cdmbar` includes some stuff that works with the VCS stamping introduced in Go 1.18, however you can compile with `-buildvcs=false` and everything should still work fine without Git installed.
 
 ```
+// Alternatively, download the source as a ZIP file
 git clone https://github.com/codemicro/bar.git
 cd bar
+
 // Will install cdmbar to ~/.local/bin - to use it with i3, we need to put it on PATH
 make clean install
 
