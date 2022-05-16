@@ -40,7 +40,7 @@ func (g *AudioPlayer) getInfo() (*playingAudioInfo, error) {
 	rawMetadataOutput, err := runCommand(playerctlExecutable, "metadata")
 	if err != nil {
 		// If there's no player open, an error will be thrown by this command
-		// with the below stdout
+		// with the below output
 		if string(rawMetadataOutput) == "No players found" {
 			return &playingAudioInfo{
 				Status: playerStatusUnknown,
