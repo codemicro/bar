@@ -9,6 +9,7 @@ import (
 
 const (
 	musicNoteString     = "♪"
+	pausedIconString    = "⏸️"
 	playerctlExecutable = "playerctl"
 
 	playerStatusStopped = "Stopped"
@@ -101,8 +102,17 @@ func (g *AudioPlayer) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 	b.ShortText = musicNoteString
 
 	if info.Status == playerStatusPlaying || (info.Status == playerStatusPaused && g.ShowTextOnPause) {
-		b.ShortText += " " + g.TrimString(info.Track)
-		b.FullText += " " + g.TrimString(fmt.Sprintf("%s - %s", info.Track, info.Artist))
+
+		b.ShortText += " "
+		b.FullText += " "
+
+		if info.Status == playerStatusPaused {
+			b.ShortText += pausedIconString + " "
+			b.FullText += pausedIconString + " "
+		}
+
+		b.ShortText += g.TrimString(info.Track)
+		b.FullText += g.TrimString(fmt.Sprintf("%s - %s", info.Track, info.Artist))
 	}
 
 	return b, nil
