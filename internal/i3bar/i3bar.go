@@ -76,6 +76,9 @@ func (b *I3bar) Emit(generators []BlockGenerator) error {
 				TextColor: defaultColorSet.Bad,
 			}
 		}
+		if b == nil {
+			continue
+		}
 		blocks = append(blocks, b)
 	}
 
