@@ -31,13 +31,15 @@ func New(writer io.Writer, updateInterval time.Duration, updateSignal syscall.Si
 }
 
 func (b *I3bar) Initialise() error {
-	_, err := b.writer.Write([]byte(
-		[]byte("{\"version\":1}\n"), // This means that versions of i3 prior to
-		// 4.3 can still work with this bar. We do not use touch features, nor
-		//do we use any special stop/start handling. That's handled by the OS.
-	))
-
+	capabilities, err := json.Marshal(map[string]any{
+		"version": 1,
+		"click_events": true,
+	})
 	if err != nil {
+		return err
+	}
+	
+	if _, err := b.writer.Write(append(capabilities, '\n')); err != nil {
 		return err
 	}
 
