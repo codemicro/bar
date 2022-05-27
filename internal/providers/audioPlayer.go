@@ -9,7 +9,7 @@ import (
 
 const (
 	musicNoteString     = "♪"
-	pausedIconString    = "⏸️"
+	pausedIconString    = "⏸"
 	playerctlExecutable = "playerctl"
 
 	playerStatusStopped = "Stopped"
