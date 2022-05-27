@@ -14,6 +14,8 @@ type Disk struct {
 	WarningThreshold float32
 
 	MountPath string
+
+	name string
 }
 
 func NewDisk(mountPath string, okThreshold, warningThreshold float32) i3bar.BlockGenerator {
@@ -21,6 +23,7 @@ func NewDisk(mountPath string, okThreshold, warningThreshold float32) i3bar.Bloc
 		OkThreshold:      okThreshold,
 		WarningThreshold: warningThreshold,
 		MountPath:        mountPath,
+		name:             "disk",
 	}
 }
 
@@ -46,7 +49,8 @@ func (g *Disk) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 	}
 
 	block := &i3bar.Block{
-		Name:      "disk",
+		Name:      g.name,
+		Instance:  g.MountPath,
 		FullText:  fmt.Sprintf("Disk avail: %.1fGB", da),
 		ShortText: fmt.Sprintf("D: %.1fGB", da),
 	}
@@ -58,4 +62,8 @@ func (g *Disk) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 	}
 
 	return block, nil
+}
+
+func (g *Disk) GetNameAndInstance() (string, string) {
+	return g.name, g.MountPath
 }

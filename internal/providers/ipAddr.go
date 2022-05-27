@@ -10,11 +10,14 @@ import (
 
 type IPAddress struct {
 	Adapter string
+
+	name string
 }
 
 func NewIPAddress(adapter string) i3bar.BlockGenerator {
 	return &IPAddress{
 		Adapter: adapter,
+		name:    "ipAddr",
 	}
 }
 
@@ -62,7 +65,10 @@ func (g *IPAddress) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 		return nil, err
 	}
 
-	block := new(i3bar.Block)
+	block := &i3bar.Block{
+		Name: g.name,
+		Instance: g.Adapter,
+	}
 
 	if ipAddr == "" {
 		block.TextColor = colors.Bad
@@ -74,4 +80,8 @@ func (g *IPAddress) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 	}
 
 	return block, nil
+}
+
+func (g *IPAddress) GetNameAndInstance() (string, string) {
+	return g.name, g.Adapter
 }

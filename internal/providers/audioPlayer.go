@@ -21,11 +21,14 @@ const (
 type AudioPlayer struct {
 	ShowTextOnPause bool
 	MaxLabelLen     int
+
+	name string
 }
 
 func NewAudioPlayer(maxLabelLength int) *AudioPlayer {
 	return &AudioPlayer{
 		MaxLabelLen: maxLabelLength,
+		name: "audioPlayer",
 	}
 }
 
@@ -103,7 +106,7 @@ func (g *AudioPlayer) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 	}
 
 	b := new(i3bar.Block)
-	b.Name = "audioPlayer"
+	b.Name = g.name
 
 	b.FullText = musicNoteString
 	b.ShortText = musicNoteString
@@ -123,4 +126,8 @@ func (g *AudioPlayer) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 	}
 
 	return b, nil
+}
+
+func (g *AudioPlayer) GetNameAndInstance() (string, string) {
+	return g.name, ""
 }

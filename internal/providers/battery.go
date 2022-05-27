@@ -11,10 +11,10 @@ import (
 )
 
 const (
-	batteryStateFull = "FULL"
+	batteryStateFull        = "FULL"
 	batteryStateDischarging = "BAT"
-	batteryStateCharging = "CHR"
-	batteryStateUnknown = "UNK"
+	batteryStateCharging    = "CHR"
+	batteryStateUnknown     = "UNK"
 )
 
 type Battery struct {
@@ -22,23 +22,25 @@ type Battery struct {
 	OkThreshold      float32
 	WarningThreshold float32
 
-	Name               string
+	DeviceName         string
 	UseDesignMaxEnergy bool
 
+	name                         string
 	previousWasBackgroundWarning bool
 }
 
-func NewBattery(name string, fullThreshold, okThreshold, warningThreshold float32) i3bar.BlockGenerator {
+func NewBattery(deviceName string, fullThreshold, okThreshold, warningThreshold float32) i3bar.BlockGenerator {
 	return &Battery{
-		Name:             name,
+		DeviceName:       deviceName,
 		FullThreshold:    fullThreshold,
 		OkThreshold:      okThreshold,
 		WarningThreshold: warningThreshold,
+		name: "battery",
 	}
 }
 
 func (g *Battery) infoPath() string {
-	return path.Join("/sys/class/power_supply", g.Name)
+	return path.Join("/sys/class/power_supply", g.DeviceName)
 }
 
 func (g *Battery) getPercentage() (float32, error) {
@@ -114,8 +116,8 @@ func (g *Battery) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 	}
 
 	block := &i3bar.Block{
-		Name:      "battery",
-		Instance:  g.Name,
+		Name:      g.name,
+		Instance:  g.DeviceName,
 		FullText:  fmt.Sprintf("%s %.1f%%", state, percentage),
 		ShortText: fmt.Sprintf("%.1f%%", percentage),
 	}
@@ -151,4 +153,8 @@ func (g *Battery) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 	}
 
 	return block, nil
+}
+
+func (g *Battery) GetNameAndInstance() (string, string) {
+	return g.name, g.DeviceName
 }

@@ -13,12 +13,16 @@ import (
 type WiFi struct {
 	Adapter     string
 	OkThreshold float32
+
+	name string
 }
 
 func NewWiFi(adapter string, okThreshold float32) i3bar.BlockGenerator {
 	return &WiFi{
 		Adapter:     adapter,
 		OkThreshold: okThreshold,
+
+		name: "wifi",
 	}
 }
 
@@ -108,7 +112,10 @@ func (g *WiFi) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 		return nil, err
 	}
 
-	block := new(i3bar.Block)
+	block := &i3bar.Block{
+		Name: g.name,
+		Instance: g.Adapter,
+	}
 
 	if ssid == "" {
 		block.TextColor = colors.Bad
@@ -125,4 +132,8 @@ func (g *WiFi) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 	}
 
 	return block, nil
+}
+
+func (g *WiFi) GetNameAndInstance() (string, string) {
+	return g.name, g.Adapter
 }

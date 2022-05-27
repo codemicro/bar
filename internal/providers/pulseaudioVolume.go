@@ -14,10 +14,14 @@ type PulseaudioVolume struct {
 	// Sink is the target sink name to look for in Pulseaudio. Leave blank
 	// to use the default sink.
 	Sink string
+
+	name string
 }
 
 func NewPulseaudioVolume() i3bar.BlockGenerator {
-	return new(PulseaudioVolume)
+	return &PulseaudioVolume{
+		name: "pulseaudioVolume",
+	}
 }
 
 func (g *PulseaudioVolume) getInfo() (string, error) {
@@ -97,7 +101,7 @@ func (g *PulseaudioVolume) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 	}
 
 	block := new(i3bar.Block)
-	block.Name = "pulseaudioVolume"
+	block.Name = g.name
 	block.Instance = g.Sink
 
 	if v.Muted {
@@ -113,4 +117,8 @@ func (g *PulseaudioVolume) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 	}
 
 	return block, nil
+}
+
+func (g *PulseaudioVolume) GetNameAndInstance() (string, string) {
+	return g.name, g.Sink
 }

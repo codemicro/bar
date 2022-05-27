@@ -144,4 +144,5 @@ type Block struct {
 
 type BlockGenerator interface {
 	Block(*ColorSet) (*Block, error)
+	GetNameAndInstance() (name, instance string)
 }

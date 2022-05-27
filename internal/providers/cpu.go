@@ -16,12 +16,15 @@ type CPU struct {
 
 	idle0, total0 uint64
 	idle1, total1 uint64
+
+	name string
 }
 
 func NewCPU(okThreshold, warningThreshold float32) i3bar.BlockGenerator {
 	m := &CPU{
 		OkThreshold:      okThreshold,
 		WarningThreshold: warningThreshold,
+		name: "cpu",
 	}
 	_ = m.doSample()
 	return m
@@ -74,7 +77,7 @@ func (g *CPU) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 	p := g.getPercentage()
 
 	block := &i3bar.Block{
-		Name:      "cpu",
+		Name:      g.name,
 		FullText:  fmt.Sprintf("CPU: %.1f%%", p),
 		ShortText: fmt.Sprintf("C: %.1f%%", p),
 	}
@@ -86,4 +89,8 @@ func (g *CPU) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 	}
 
 	return block, nil
+}
+
+func (g *CPU) GetNameAndInstance() (string, string) {
+	return g.name, ""
 }

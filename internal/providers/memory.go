@@ -13,12 +13,15 @@ import (
 type Memory struct {
 	OkThreshold      float32
 	WarningThreshold float32
+
+	name string
 }
 
 func NewMemory(okThreshold, warningThreshold float32) i3bar.BlockGenerator {
 	return &Memory{
 		OkThreshold:      okThreshold,
 		WarningThreshold: warningThreshold,
+		name: "memory",
 	}
 }
 
@@ -69,7 +72,7 @@ func (g *Memory) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 	// TODO: Make the readout change between KB/MB/GB
 
 	block := &i3bar.Block{
-		Name:      "memory",
+		Name:      g.name,
 		FullText:  fmt.Sprintf("Mem: %.1fGB of %.1fGB", used, total),
 		ShortText: fmt.Sprintf("M: %.1fGB", used),
 	}
@@ -81,4 +84,8 @@ func (g *Memory) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 	}
 
 	return block, nil
+}
+
+func (g *Memory) GetNameAndInstance() (string, string) {
+	return g.name, ""
 }
