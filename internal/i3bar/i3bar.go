@@ -103,7 +103,10 @@ func (b *I3bar) Emit(generators []BlockGenerator) error {
 // RegisterBlockGenerator registers a block generator with the status bar. This
 // function should not be called after StartLoop is called.
 func (b *I3bar) RegisterBlockGenerator(bg ...BlockGenerator) {
-	b.registeredGenerators = append(b.registeredGenerators, bg...)
+	for _, bgx := range bg {
+		b.registeredGenerators = append([]BlockGenerator{bgx}, b.registeredGenerators...)
+	}
+
 	for _, generator := range bg {
 		if g, ok := generator.(ClickEventConsumer); ok {
 			b.registeredConsumers = append(b.registeredConsumers, g)

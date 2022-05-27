@@ -44,15 +44,15 @@ func run() error {
 	}
 
 	b.RegisterBlockGenerator(
-		providers.NewAudioPlayer(32),
-		providers.NewIPAddress("wlp0s20f3"),
-		providers.NewWiFi("wlp0s20f3", 75),
-		providers.NewBattery("BAT0", 80, 30, 20),
-		providers.NewDisk("/", 30, 10),
-		providers.NewCPU(20, 50),
-		providers.NewMemory(7, 5),
-		providers.NewPulseaudioVolume(),
 		providers.NewDateTime(),
+		providers.NewPulseaudioVolume(),
+		providers.NewMemory(7, 5),
+		providers.NewCPU(20, 50),
+		providers.NewDisk("/", 30, 10),
+		providers.NewBattery("BAT0", 80, 30, 20),
+		providers.NewWiFi("wlp0s20f3", 75),
+		providers.NewIPAddress("wlp0s20f3"),
+		providers.NewAudioPlayer(32),
 	)
 
 	if err := b.Emit([]i3bar.BlockGenerator{
