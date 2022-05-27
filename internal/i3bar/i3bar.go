@@ -1,6 +1,8 @@
 package i3bar
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -14,17 +16,20 @@ import (
 
 type I3bar struct {
 	writer               io.Writer
+	reader               io.Reader
 	updateInterval       time.Duration
 	updateSignal         syscall.Signal
 	registeredGenerators []BlockGenerator
+	registeredConsumers  []ClickEventConsumer
 
 	hasInitialised   bool
 	hasSentFirstLine bool
 }
 
-func New(writer io.Writer, updateInterval time.Duration, updateSignal syscall.Signal) *I3bar {
+func New(writer io.Writer, reader io.Reader, updateInterval time.Duration, updateSignal syscall.Signal) *I3bar {
 	return &I3bar{
 		writer:         writer,
+		reader:         reader,
 		updateInterval: updateInterval,
 		updateSignal:   updateSignal,
 	}
@@ -32,13 +37,13 @@ func New(writer io.Writer, updateInterval time.Duration, updateSignal syscall.Si
 
 func (b *I3bar) Initialise() error {
 	capabilities, err := json.Marshal(map[string]any{
-		"version": 1,
+		"version":      1,
 		"click_events": true,
 	})
 	if err != nil {
 		return err
 	}
-	
+
 	if _, err := b.writer.Write(append(capabilities, '\n')); err != nil {
 		return err
 	}
@@ -95,8 +100,15 @@ func (b *I3bar) Emit(generators []BlockGenerator) error {
 	return nil
 }
 
+// RegisterBlockGenerator registers a block generator with the status bar. This
+// function should not be called after StartLoop is called.
 func (b *I3bar) RegisterBlockGenerator(bg ...BlockGenerator) {
 	b.registeredGenerators = append(b.registeredGenerators, bg...)
+	for _, generator := range bg {
+		if g, ok := generator.(ClickEventConsumer); ok {
+			b.registeredConsumers = append(b.registeredConsumers, g)
+		}
+	}
 }
 
 func (b *I3bar) StartLoop() error {
@@ -110,15 +122,50 @@ func (b *I3bar) StartLoop() error {
 	sigUpdate := make(chan os.Signal, 1)
 	signal.Notify(sigUpdate, os.Signal(b.updateSignal))
 
+	go b.consumerLoop(func() {
+		sigUpdate <- b.updateSignal
+	})
+
 	for {
 		select {
 		case <-sigUpdate:
 			if err := b.Emit(b.registeredGenerators); err != nil {
-				return err
+				log.Error().Err(err).Msg("could not emit registered generators")
 			}
 		case <-ticker.C:
 			if err := b.Emit(b.registeredGenerators); err != nil {
-				return err
+				log.Error().Err(err).Msg("could not emit registered generators")
+			}
+		}
+	}
+}
+
+func (b *I3bar) consumerLoop(requestBarRefresh func()) {
+	r := bufio.NewReader(b.reader)
+	for {
+		inputBytes, err := r.ReadBytes('\n')
+		if err != nil {
+			log.Error().Err(err).Msg("could not read from input reader")
+			continue
+		}
+
+		// "ReadBytes reads until the first occurrence of delim in the input,
+		// returning a slice containing the data up to and including the
+		// delimiter."
+		inputBytes = inputBytes[:len(inputBytes)-1]
+
+		// try and parse inputted JSON
+		event := new(ClickEvent)
+		if err := json.Unmarshal(bytes.Trim(inputBytes, ","), event); err != nil {
+			continue // idk what this could be but it's not relevant so BYE!
+		}
+
+		for _, consumer := range b.registeredConsumers {
+			consumerName, consumerInstance := consumer.GetNameAndInstance()
+			if consumerName == event.Name && (consumerName == "" || consumerInstance == event.Instance) {
+				if consumer.OnClick(event) {
+					requestBarRefresh()
+				}
 			}
 		}
 	}
@@ -144,7 +191,36 @@ type Block struct {
 	Markup              string `json:"markup,omitempty"`
 }
 
-type BlockGenerator interface {
-	Block(*ColorSet) (*Block, error)
+type ProvidesNameAndInstance interface {
 	GetNameAndInstance() (name, instance string)
+}
+
+type BlockGenerator interface {
+	ProvidesNameAndInstance
+	Block(*ColorSet) (*Block, error)
+}
+
+type ClickEvent struct {
+	Name      string   `json:"name"`
+	Instance  string   `json:"instance"`
+	Button    int      `json:"button"`
+	Modifiers []string `json:"modifiers"`
+	X         int      `json:"x"`
+	Y         int      `json:"y"`
+	RelativeX int      `json:"relative_x"`
+	RelativeY int      `json:"relative_y"`
+	OutputX   int      `json:"output_x"`
+	OutputY   int      `json:"output_y"`
+	Width     int      `json:"width"`
+	Height    int      `json:"height"`
+}
+
+type ClickEventConsumer interface {
+	ProvidesNameAndInstance
+	// OnClick is called when a new ClickEvent is recieved with the
+	// corresponding name and instance is recieved. If OnClick returns true, a
+	// refresh of the entire statusbar will be performed.
+	//
+	// OnClick must not modify the ClickEvent as it may be reused elsewhere.
+	OnClick(*ClickEvent) (shouldRefresh bool)
 }

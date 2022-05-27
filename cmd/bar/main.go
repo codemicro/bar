@@ -25,7 +25,7 @@ func main() {
 		Filename: logFileName,
 		MaxSize:  1,  // MB
 		MaxAge:   14, // days
-	})).Level(zerolog.ErrorLevel)
+	})).Level(zerolog.DebugLevel)
 
 	if err := run(); err != nil {
 		log.Fatal().Err(err).Msg("unhandled error")
@@ -33,7 +33,7 @@ func main() {
 }
 
 func run() error {
-	b := i3bar.New(os.Stdout, time.Second*5, syscall.SIGUSR1)
+	b := i3bar.New(os.Stdout, os.Stdin, time.Second*5, syscall.SIGUSR1)
 	if err := b.Initialise(); err != nil {
 		return err
 	}

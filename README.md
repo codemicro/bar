@@ -4,12 +4,13 @@
 
 ---
 
-This is a i3wm status bar that's built as a toy project. It's pretty basic, doesn't have many features and isn't very configurable unless you want to edit the source and recompile it.
+This is a i3wm status bar that's built as a toy project. ~~It's~~ **It was** pretty basic (I've since added click event support), doesn't have many features and isn't very configurable unless you want to edit the source and recompile it.
 
 This interacts with i3 using the [i3bar input protocol](https://i3wm.org/docs/i3bar-protocol.html). i3 versions earlier than v4.3 are not supported.
 
 ### Features
 
+* Supports click events
 * SIGUSR1 forces a refresh
 * It has colours
 * Sometimes it breaks
