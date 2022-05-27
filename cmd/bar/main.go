@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"os/signal"
 	"path"
 	"runtime/debug"
 	"syscall"
@@ -34,7 +33,7 @@ func main() {
 }
 
 func run() error {
-	b := i3bar.New(os.Stdout)
+	b := i3bar.New(os.Stdout, time.Second*5, syscall.SIGUSR1)
 	if err := b.Initialise(); err != nil {
 		return err
 	}
@@ -44,13 +43,7 @@ func run() error {
 		commitHash = " " + commitHash
 	}
 
-	if err := b.Emit([]i3bar.BlockGenerator{
-		providers.NewPlainText("cdmbar" + commitHash),
-	}); err != nil {
-		return err
-	}
-
-	blocks := []i3bar.BlockGenerator{
+	b.RegisterBlockGenerator(
 		providers.NewAudioPlayer(32),
 		providers.NewIPAddress("wlp0s20f3"),
 		providers.NewWiFi("wlp0s20f3", 75),
@@ -60,31 +53,17 @@ func run() error {
 		providers.NewMemory(7, 5),
 		providers.NewPulseaudioVolume(),
 		providers.NewDateTime(),
+	)
+
+	if err := b.Emit([]i3bar.BlockGenerator{
+		providers.NewPlainText("cdmbar" + commitHash),
+	}); err != nil {
+		return err
 	}
 
-	ticker := time.NewTicker(time.Second * 5)
-	sigUpdate := make(chan os.Signal, 1)
+	time.Sleep(time.Second) // show "cdmbar" for one second
 
-	signal.Notify(sigUpdate, syscall.SIGUSR1)
-
-	go func() {
-		// hacky thing to force an update in a second so we can clear the "cdmbar <VERSION>" readout
-		time.Sleep(time.Millisecond * 1000)
-		sigUpdate <- os.Signal(syscall.SIGUSR1)
-	}()
-
-	for {
-		select {
-		case <-sigUpdate:
-			if err := b.Emit(blocks); err != nil {
-				return err
-			}
-		case <-ticker.C:
-			if err := b.Emit(blocks); err != nil {
-				return err
-			}
-		}
-	}
+	return b.StartLoop()
 }
 
 func getCommitHash() string {

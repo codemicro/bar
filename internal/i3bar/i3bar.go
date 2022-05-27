@@ -4,19 +4,29 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/rs/zerolog/log"
 )
 
 type I3bar struct {
-	writer io.Writer
+	writer               io.Writer
+	updateInterval       time.Duration
+	updateSignal         syscall.Signal
+	registeredGenerators []BlockGenerator
 
+	hasInitialised   bool
 	hasSentFirstLine bool
 }
 
-func New(writer io.Writer) *I3bar {
+func New(writer io.Writer, updateInterval time.Duration, updateSignal syscall.Signal) *I3bar {
 	return &I3bar{
-		writer: writer,
+		writer:         writer,
+		updateInterval: updateInterval,
+		updateSignal:   updateSignal,
 	}
 }
 
@@ -26,7 +36,13 @@ func (b *I3bar) Initialise() error {
 		// 4.3 can still work with this bar. We do not use touch features, nor
 		//do we use any special stop/start handling. That's handled by the OS.
 	))
-	return err
+
+	if err != nil {
+		return err
+	}
+
+	b.hasInitialised = true
+	return nil
 }
 
 var defaultColorSet = &ColorSet{
@@ -37,6 +53,12 @@ var defaultColorSet = &ColorSet{
 }
 
 func (b *I3bar) Emit(generators []BlockGenerator) error {
+	if !b.hasInitialised {
+		if err := b.Initialise(); err != nil {
+			return err
+		}
+	}
+
 	var blocks []*Block
 	for _, generator := range generators {
 		b, err := generator.Block(defaultColorSet)
@@ -69,6 +91,35 @@ func (b *I3bar) Emit(generators []BlockGenerator) error {
 	}
 
 	return nil
+}
+
+func (b *I3bar) RegisterBlockGenerator(bg ...BlockGenerator) {
+	b.registeredGenerators = append(b.registeredGenerators, bg...)
+}
+
+func (b *I3bar) StartLoop() error {
+	// The ticker will start after the specified duration, not when we
+	// instantiate it. Circumventing that here by calling Emit now.
+	if err := b.Emit(b.registeredGenerators); err != nil {
+		return err
+	}
+
+	ticker := time.NewTicker(b.updateInterval)
+	sigUpdate := make(chan os.Signal, 1)
+	signal.Notify(sigUpdate, os.Signal(b.updateSignal))
+
+	for {
+		select {
+		case <-sigUpdate:
+			if err := b.Emit(b.registeredGenerators); err != nil {
+				return err
+			}
+		case <-ticker.C:
+			if err := b.Emit(b.registeredGenerators); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 type Block struct {
