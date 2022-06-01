@@ -3,6 +3,7 @@ package providers
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/codemicro/bar/internal/i3bar"
 )
@@ -130,4 +131,10 @@ func (g *AudioPlayer) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 
 func (g *AudioPlayer) GetNameAndInstance() (string, string) {
 	return g.name, ""
+}
+
+func (g *AudioPlayer) OnClick(*i3bar.ClickEvent) bool {
+	_, _ = runCommand(playerctlExecutable, "play-pause")
+	time.Sleep(time.Millisecond * 500)
+	return true
 }
