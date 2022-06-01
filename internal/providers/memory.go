@@ -69,11 +69,9 @@ func (g *Memory) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 	}
 	avail := total - used
 
-	// TODO: Make the readout change between KB/MB/GB
-
 	block := &i3bar.Block{
 		Name:      g.name,
-		FullText:  fmt.Sprintf("Mem: %.1fGB of %.1fGB", used, total),
+		FullText:  fmt.Sprintf("Mem: %.1f/%.1fGB", used, total),
 		ShortText: fmt.Sprintf("M: %.1fGB", used),
 	}
 

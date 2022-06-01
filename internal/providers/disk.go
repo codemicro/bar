@@ -51,7 +51,7 @@ func (g *Disk) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 	block := &i3bar.Block{
 		Name:      g.name,
 		Instance:  g.MountPath,
-		FullText:  fmt.Sprintf("Disk avail: %.1fGB", da),
+		FullText:  fmt.Sprintf("Disk: %.1fGB", da),
 		ShortText: fmt.Sprintf("D: %.1fGB", da),
 	}
 
