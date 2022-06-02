@@ -160,8 +160,6 @@ func (b *I3bar) consumerLoop(requestBarRefresh func()) {
 		// delimiter."
 		inputBytes = inputBytes[:len(inputBytes)-1]
 
-		log.Debug().Str("plainContent", string(inputBytes)).Msg("got event from window manager")
-
 		// try and parse inputted JSON
 		event := new(ClickEvent)
 		if err := json.Unmarshal(bytes.Trim(inputBytes, ","), event); err != nil {
