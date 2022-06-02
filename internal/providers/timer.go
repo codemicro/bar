@@ -29,16 +29,20 @@ func NewTimer(useShortLabel bool) i3bar.BlockGenerator {
 }
 
 func (g *Timer) OnClick(event *i3bar.ClickEvent) bool {
-	resetButtonPressed := event.Button == 3
+	resetButtonPressed := event.Button == i3bar.RightMouseButton
+	triggerButtonPressed := event.Button == i3bar.LeftMouseButton
 
 	numStoredTimes := len(g.times)
 
 	if numStoredTimes == 0 {
-		// start
+		// start only if the left mouse button pressed
+		if !triggerButtonPressed {
+			return false
+		}
 		g.times = []time.Time{time.Now()}
 	} else if resetButtonPressed {
 		g.times = nil
-	} else {
+	} else if triggerButtonPressed {
 		// play/pause
 		g.times = append(g.times, time.Now())
 	}

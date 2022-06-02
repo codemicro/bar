@@ -133,8 +133,11 @@ func (g *AudioPlayer) GetNameAndInstance() (string, string) {
 	return g.name, ""
 }
 
-func (g *AudioPlayer) OnClick(*i3bar.ClickEvent) bool {
+func (g *AudioPlayer) OnClick(event *i3bar.ClickEvent) bool {
+	if event.Button != i3bar.LeftMouseButton {
+		return false
+	}
 	_, _ = runCommand(playerctlExecutable, "play-pause")
-	time.Sleep(time.Millisecond * 500)
+	time.Sleep(time.Millisecond * 50)
 	return true
 }

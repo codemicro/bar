@@ -160,6 +160,8 @@ func (b *I3bar) consumerLoop(requestBarRefresh func()) {
 		// delimiter."
 		inputBytes = inputBytes[:len(inputBytes)-1]
 
+		log.Debug().Str("plainContent", string(inputBytes)).Msg("got event from window manager")
+
 		// try and parse inputted JSON
 		event := new(ClickEvent)
 		if err := json.Unmarshal(bytes.Trim(inputBytes, ","), event); err != nil {
@@ -207,18 +209,18 @@ type BlockGenerator interface {
 }
 
 type ClickEvent struct {
-	Name      string   `json:"name"`
-	Instance  string   `json:"instance"`
-	Button    int      `json:"button"`
-	Modifiers []string `json:"modifiers"`
-	X         int      `json:"x"`
-	Y         int      `json:"y"`
-	RelativeX int      `json:"relative_x"`
-	RelativeY int      `json:"relative_y"`
-	OutputX   int      `json:"output_x"`
-	OutputY   int      `json:"output_y"`
-	Width     int      `json:"width"`
-	Height    int      `json:"height"`
+	Name      string          `json:"name"`
+	Instance  string          `json:"instance"`
+	Button    MouseButtonType `json:"button"`
+	Modifiers []string        `json:"modifiers"`
+	X         int             `json:"x"`
+	Y         int             `json:"y"`
+	RelativeX int             `json:"relative_x"`
+	RelativeY int             `json:"relative_y"`
+	OutputX   int             `json:"output_x"`
+	OutputY   int             `json:"output_y"`
+	Width     int             `json:"width"`
+	Height    int             `json:"height"`
 }
 
 type ClickEventConsumer interface {
@@ -230,3 +232,13 @@ type ClickEventConsumer interface {
 	// OnClick must not modify the ClickEvent as it may be reused elsewhere.
 	OnClick(*ClickEvent) (shouldRefresh bool)
 }
+
+type MouseButtonType uint8
+
+const (
+	LeftMouseButton MouseButtonType = iota + 1
+	MiddleMouseButton
+	RightMouseButton
+	MouseWheelScrollUp
+	MouseWheelScrollDown
+)
