@@ -15,7 +15,7 @@ clean:
 
 install: bin/cdmbar
 	mkdir -p $(install_dir)
-	cp bin/cdmbar $(install_dir)
+	cp bin/cdmbar $(install_dir)/cdmbar
 
 uninstall:
 	rm $(install_dir)/cdmbar
