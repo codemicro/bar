@@ -43,6 +43,7 @@ func run() error {
 		commitHash = " " + commitHash
 	}
 
+	// Blocks registered first will be the rightmost in the status bar.
 	b.RegisterBlockGenerator(
 		providers.NewDateTime(),
 		providers.NewTimer(true),

@@ -15,6 +15,20 @@ This interacts with i3 using the [i3bar input protocol](https://i3wm.org/docs/i3
 * It has colours
 * Sometimes it breaks
 
+### Included providers
+
+* `AudioPlayer` - show the currently playing song
+* `Battery` - show the current battery charge status and provide alerts if it leaves set boundaries
+* `CPU` - show CPU load and provide alerts if it leaves set boundaries
+* `DateTime` - show the current date and time
+* `Disk` - show the current usage of a disk
+* `IPAddress` - show the current local IPv4 address
+* `Memory` - show the current memory usage and provide alerts it if leaves set boundaries
+* `PlainText`
+* `PulseaudioVolume` - show the current volume of a PulseAudio sink and control that using the scroll wheel
+* `Timer` - provides a small timer that play/pauses with a left-click and resets with a right-click.
+* `WiFi` - show the curent WiFi SSID, connection frequency and connection strength
+
 ### Compiling locally
 
 These instructions assume you have a recent version of the Go 1.18 (or newer) toolchain installed on your machine and a copy of GNU Make.
@@ -45,4 +59,4 @@ bar {
 
 ### Changing options
 
-Edit the `blocks` variable inside of `cmd/bar/main.go`, then recompile.
+Edit the arguments of the call to `b.RegisterBlockGenerator` inside of `cmd/bar/main.go`, then recompile.
