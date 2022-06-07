@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/codemicro/bar/internal/i3bar"
+	"github.com/rs/zerolog/log"
 )
 
 type PulseaudioVolume struct {
@@ -121,4 +122,45 @@ func (g *PulseaudioVolume) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 
 func (g *PulseaudioVolume) GetNameAndInstance() (string, string) {
 	return g.name, g.Sink
+}
+
+func (g *PulseaudioVolume) applyVolumeDelta(percentageChange int) error {
+	// pactl set-sink-volume @DEFAULT_SINK@ +10%
+	sinkName := g.Sink
+	if sinkName == "" {
+		sinkName = "@DEFAULT_SINK@"
+	}
+
+	var percentageString string
+	if percentageChange == 0 {
+		return nil
+	} else if percentageChange > 0 {
+		// If we have a negative number, it's prepended with - automatically,
+		// but positive numbers aren't!
+		percentageString += "+"
+	}
+	percentageString += strconv.Itoa(percentageChange)
+	percentageString += "%"
+
+	_, err := runCommand("pactl", "set-sink-volume", sinkName, percentageString)
+	return err
+}
+
+func (g *PulseaudioVolume) OnClick(event *i3bar.ClickEvent) bool {
+	var err error
+
+	switch event.Button {
+	case i3bar.MouseWheelScrollUp:
+		err = g.applyVolumeDelta(1)
+	case i3bar.MouseWheelScrollDown:
+		err = g.applyVolumeDelta(-1)
+	default:
+		return false
+	}
+
+	if err != nil {
+		log.Error().Err(err).Str("location", "pulseaudioVolume_OnClick").Send()
+	}
+
+	return true
 }
