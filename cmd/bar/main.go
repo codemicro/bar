@@ -45,6 +45,7 @@ func run() error {
 
 	// Blocks registered first will be the rightmost in the status bar.
 	b.RegisterBlockGenerator(
+		providers.NewLaunchProgram("MINI", "/home/akp/.local/bin/minisettings"),
 		providers.NewDateTime(),
 		providers.NewTimer(true),
 		providers.NewPulseaudioVolume(),
