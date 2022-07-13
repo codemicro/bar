@@ -33,7 +33,7 @@ func main() {
 }
 
 func run() error {
-	b := i3bar.New(os.Stdout, os.Stdin, time.Second*5, syscall.SIGUSR1)
+	b := i3bar.New(os.Stdout, os.Stdin, time.Second*2, syscall.SIGUSR1)
 	if err := b.Initialise(); err != nil {
 		return err
 	}

@@ -33,7 +33,7 @@ type AudioPlayer struct {
 func NewAudioPlayer(maxLabelLength int) *AudioPlayer {
 	return &AudioPlayer{
 		MaxLabelLen: maxLabelLength,
-		TickerSteps: 10,
+		TickerSteps: 5,
 		name:        "audioPlayer",
 	}
 }
