@@ -22,14 +22,19 @@ const (
 type AudioPlayer struct {
 	ShowTextOnPause bool
 	MaxLabelLen     int
+	TickerSteps     int
 
 	name string
+
+	lastText string
+	tickerCursor int
 }
 
 func NewAudioPlayer(maxLabelLength int) *AudioPlayer {
 	return &AudioPlayer{
 		MaxLabelLen: maxLabelLength,
-		name: "audioPlayer",
+		TickerSteps: 10,
+		name:        "audioPlayer",
 	}
 }
 
@@ -93,11 +98,31 @@ func (g *AudioPlayer) getInfo() (*playingAudioInfo, error) {
 	return info, nil
 }
 
-func (g *AudioPlayer) TrimString(x string) string {
-	if len(x) > g.MaxLabelLen {
-		x = x[:g.MaxLabelLen] + "..."
+func (g *AudioPlayer) AnimateTicker(x string) string {
+	if len(x) <= g.MaxLabelLen {
+		g.lastText = x
+		return x
 	}
-	return x
+	mod := x + "    "
+	
+	if mod != g.lastText {
+		g.tickerCursor = 0
+		g.lastText = mod
+		return mod[:g.MaxLabelLen]
+	}
+
+	g.tickerCursor += g.TickerSteps
+	if l := len(mod); g.tickerCursor >= l {
+		g.tickerCursor -= l
+	}
+
+	if g.tickerCursor + g.MaxLabelLen > len(mod) {
+		diff := len(mod) - g.tickerCursor
+		fmt.Println("diff", diff, "cursor", g.tickerCursor)
+		return mod[g.tickerCursor:] + mod[:g.MaxLabelLen-diff]
+	}
+
+	return mod[g.tickerCursor:g.tickerCursor+g.MaxLabelLen]
 }
 
 func (g *AudioPlayer) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
@@ -110,20 +135,16 @@ func (g *AudioPlayer) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 	b.Name = g.name
 
 	b.FullText = musicNoteString
-	b.ShortText = musicNoteString
 
 	if info.Status == playerStatusPlaying || (info.Status == playerStatusPaused && g.ShowTextOnPause) {
 
-		b.ShortText += " "
 		b.FullText += " "
 
 		if info.Status == playerStatusPaused {
-			b.ShortText += pausedIconString + " "
 			b.FullText += pausedIconString + " "
 		}
 
-		b.ShortText += g.TrimString(info.Track)
-		b.FullText += g.TrimString(fmt.Sprintf("%s - %s", info.Track, info.Artist))
+		b.FullText += g.AnimateTicker(fmt.Sprintf("%s - %s", info.Track, info.Artist))
 	}
 
 	return b, nil
