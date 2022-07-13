@@ -26,14 +26,14 @@ type AudioPlayer struct {
 
 	name string
 
-	lastText string
+	lastText     string
 	tickerCursor int
 }
 
 func NewAudioPlayer(maxLabelLength int) *AudioPlayer {
 	return &AudioPlayer{
 		MaxLabelLen: maxLabelLength,
-		TickerSteps: 5,
+		TickerSteps: 3,
 		name:        "audioPlayer",
 	}
 }
@@ -104,7 +104,7 @@ func (g *AudioPlayer) AnimateTicker(x string) string {
 		return x
 	}
 	mod := x + "    "
-	
+
 	if mod != g.lastText {
 		g.tickerCursor = 0
 		g.lastText = mod
@@ -116,13 +116,12 @@ func (g *AudioPlayer) AnimateTicker(x string) string {
 		g.tickerCursor -= l
 	}
 
-	if g.tickerCursor + g.MaxLabelLen > len(mod) {
+	if g.tickerCursor+g.MaxLabelLen > len(mod) {
 		diff := len(mod) - g.tickerCursor
-		fmt.Println("diff", diff, "cursor", g.tickerCursor)
 		return mod[g.tickerCursor:] + mod[:g.MaxLabelLen-diff]
 	}
 
-	return mod[g.tickerCursor:g.tickerCursor+g.MaxLabelLen]
+	return mod[g.tickerCursor : g.tickerCursor+g.MaxLabelLen]
 }
 
 func (g *AudioPlayer) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
