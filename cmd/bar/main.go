@@ -47,7 +47,6 @@ func run() error {
 	b.RegisterBlockGenerator(
 		providers.NewLaunchProgram("MINI", "/home/akp/.local/bin/minisettings"),
 		providers.NewDateTime(),
-		providers.NewTimer(true),
 		providers.NewPulseaudioVolume(),
 		providers.NewMemory(7, 5),
 		providers.NewCPU(20, 50),
