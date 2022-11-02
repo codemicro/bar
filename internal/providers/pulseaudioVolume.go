@@ -31,6 +31,24 @@ func (g *PulseaudioVolume) getInfo() (string, error) {
 }
 
 var (
+	pactlInfoDefaultSinkRegexp = regexp.MustCompile(`Default Sink: (.+)`)
+)
+
+func (g *PulseaudioVolume) getDefaultSink() (string, error) {
+	x, err := runCommand("pactl", "info")
+	if err != nil {
+		return "", err
+	}
+
+	submatches := pactlInfoDefaultSinkRegexp.FindSubmatch(x)
+	if len(submatches) == 0 {
+		return "", errors.New("unexpectedly formed `pactl info` output")
+	}
+
+	return string(submatches[1]), nil
+}
+
+var (
 	pulseaudioInfoParseRegexp = regexp.MustCompile(`(\d+ sink\(s\) available\.|\d+ source\(s\) available\.)`)
 	pulseaudioVolumeRegexp    = regexp.MustCompile(`volume: front-left: \d+ \/ +(\d{1,3})% \/ (?:\d|.)+ dB, +front-right: \d+ \/ +(\d{1,3})% \/ (?:\d|.)+ dB`)
 	pulseaudioMutedRegexp     = regexp.MustCompile(`muted: (.+)`)
@@ -46,6 +64,17 @@ type volumeInfo struct {
 func (g *PulseaudioVolume) getVolume(info string) (*volumeInfo, error) {
 	x := pulseaudioInfoParseRegexp.Split(info, 5)
 
+	var targetSink string
+	if g.Sink == "" {
+		var err error
+		targetSink, err = g.getDefaultSink()
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		targetSink = g.Sink
+	}
+
 	sinkInfoStrings := strings.Split(
 		strings.TrimLeft(x[1], "\n\t* "),
 		"index: ",
@@ -54,7 +83,7 @@ func (g *PulseaudioVolume) getVolume(info string) (*volumeInfo, error) {
 	for _, sinkText := range sinkInfoStrings {
 		v := new(volumeInfo)
 		name := pulseaudioNameRegexp.FindStringSubmatch(sinkText)
-		if len(name) == 2 && (strings.EqualFold(name[1], g.Sink) || g.Sink == "") {
+		if len(name) == 2 && (strings.EqualFold(name[1], targetSink)) {
 			volumes := pulseaudioVolumeRegexp.FindStringSubmatch(sinkText)
 			muted := pulseaudioMutedRegexp.FindStringSubmatch(sinkText)[1]
 
