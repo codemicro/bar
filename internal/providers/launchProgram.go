@@ -33,6 +33,10 @@ func (g *LaunchProgram) GetNameAndInstance() (string, string) {
 }
 
 func (g *LaunchProgram) OnClick(event *i3bar.ClickEvent) bool {
+	if event.Button != i3bar.LeftMouseButton {
+		return false
+	}
+
 	process, err := os.StartProcess(g.Executable, []string{g.Executable}, &os.ProcAttr{Files: []*os.File{os.Stdin, os.Stdout, os.Stderr}})
 	if err != nil {
 		log.Error().Err(err).Str("location", "launchProgram_onClick").Msg("Could not start process")
