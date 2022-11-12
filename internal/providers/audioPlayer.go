@@ -154,10 +154,17 @@ func (g *AudioPlayer) GetNameAndInstance() (string, string) {
 }
 
 func (g *AudioPlayer) OnClick(event *i3bar.ClickEvent) bool {
-	if event.Button != i3bar.LeftMouseButton {
+	switch event.Button {
+	case i3bar.LeftMouseButton:
+		_, _ = runCommand(playerctlExecutable, "play-pause")
+	case i3bar.MouseWheelScrollUp:
+		_, _ = runCommand(playerctlExecutable, "next")
+	case i3bar.MouseWheelScrollDown:
+		_, _ = runCommand(playerctlExecutable, "previous")
+	default:
 		return false
 	}
-	_, _ = runCommand(playerctlExecutable, "play-pause")
+	
 	time.Sleep(time.Millisecond * 50)
 	return true
 }
