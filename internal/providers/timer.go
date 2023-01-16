@@ -28,6 +28,10 @@ func NewTimer(useShortLabel bool) i3bar.BlockGenerator {
 	}
 }
 
+func (g *Timer) Frequency() uint8 {
+	return 1
+}
+
 func (g *Timer) OnClick(event *i3bar.ClickEvent) bool {
 	resetButtonPressed := event.Button == i3bar.RightMouseButton
 	triggerButtonPressed := event.Button == i3bar.LeftMouseButton

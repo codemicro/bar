@@ -25,6 +25,10 @@ func NewPulseaudioVolume() i3bar.BlockGenerator {
 	}
 }
 
+func (g *PulseaudioVolume) Frequency() uint8 {
+	return 2
+}
+
 func (g *PulseaudioVolume) getInfo() (string, error) {
 	x, err := runCommand("pacmd", "info")
 	return string(x), err

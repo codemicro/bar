@@ -27,6 +27,10 @@ func NewDisk(mountPath string, okThreshold, warningThreshold float32) i3bar.Bloc
 	}
 }
 
+func (g *Disk) Frequency() uint8 {
+	return 5
+}
+
 func (g *Disk) getAvailable() (float32, error) {
 	cmdout, err := runCommand("df", "-x", "fuse.portal")
 	if err != nil {

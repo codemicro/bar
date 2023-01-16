@@ -25,6 +25,10 @@ func NewMemory(okThreshold, warningThreshold float32) i3bar.BlockGenerator {
 	}
 }
 
+func (g *Memory) Frequency() uint8 {
+	return 2
+}
+
 var (
 	memoryTotalRegexp     = regexp.MustCompile(`MemTotal: +(\d+) kB`)
 	memoryAvailableRegexp = regexp.MustCompile(`MemAvailable: +(\d+) kB`)

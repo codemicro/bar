@@ -33,7 +33,7 @@ func main() {
 }
 
 func run() error {
-	b := i3bar.New(os.Stdout, os.Stdin, time.Second*2, syscall.SIGUSR1)
+	b := i3bar.New(os.Stdout, os.Stdin, syscall.SIGUSR1)
 	if err := b.Initialise(); err != nil {
 		return err
 	}
@@ -57,8 +57,8 @@ func run() error {
 		providers.NewAudioPlayer(32),
 	)
 
-	if err := b.Emit([]i3bar.BlockGenerator{
-		providers.NewPlainText("cdmbar" + commitHash),
+	if err := b.Emit([]*i3bar.Block{
+		{FullText: "cdmbar" + commitHash},
 	}); err != nil {
 		return err
 	}

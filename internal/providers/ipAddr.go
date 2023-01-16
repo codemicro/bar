@@ -21,6 +21,10 @@ func NewIPAddress(adapter string) i3bar.BlockGenerator {
 	}
 }
 
+func (g *IPAddress) Frequency() uint8 {
+	return 5
+}
+
 func (g *IPAddress) getAdapterIPAddress() (string, error) {
 	// call ifconfig
 	output, err := runCommand("ifconfig")

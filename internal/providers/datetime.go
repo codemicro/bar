@@ -17,6 +17,10 @@ func NewDateTime() i3bar.BlockGenerator {
 	}
 }
 
+func (g *DateTime) Frequency() uint8 {
+	return 1
+}
+
 func (g *DateTime) Block(*i3bar.ColorSet) (*i3bar.Block, error) {
 	cTime := time.Now().Local()
 

@@ -27,6 +27,7 @@ type Battery struct {
 
 	name                         string
 	previousWasBackgroundWarning bool
+	isAlert                      bool
 }
 
 func NewBattery(deviceName string, fullThreshold, okThreshold, warningThreshold float32) i3bar.BlockGenerator {
@@ -35,8 +36,15 @@ func NewBattery(deviceName string, fullThreshold, okThreshold, warningThreshold 
 		FullThreshold:    fullThreshold,
 		OkThreshold:      okThreshold,
 		WarningThreshold: warningThreshold,
-		name: "battery",
+		name:             "battery",
 	}
+}
+
+func (g *Battery) Frequency() uint8 {
+	if g.isAlert {
+		return 1
+	}
+	return 5
 }
 
 func (g *Battery) infoPath() string {
@@ -124,6 +132,8 @@ func (g *Battery) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 
 	if percentage < g.WarningThreshold && g.WarningThreshold != 0 {
 
+		g.isAlert = true
+
 		if g.previousWasBackgroundWarning || state == batteryStateCharging { // disable flashing when on charge
 			block.TextColor = colors.Bad
 		} else {
@@ -134,6 +144,8 @@ func (g *Battery) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 
 	} else if percentage < g.OkThreshold && g.OkThreshold != 0 {
 		block.TextColor = colors.Warning
+	} else {
+		g.isAlert = false
 	}
 
 	switch state {

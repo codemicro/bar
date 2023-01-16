@@ -30,6 +30,10 @@ func NewCPU(okThreshold, warningThreshold float32) i3bar.BlockGenerator {
 	return m
 }
 
+func (g *CPU) Frequency() uint8 {
+	return 2
+}
+
 func (g *CPU) doSample() error {
 	contents, err := ioutil.ReadFile("/proc/stat")
 	if err != nil {

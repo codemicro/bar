@@ -14,23 +14,25 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type I3bar struct {
-	writer               io.Writer
-	reader               io.Reader
-	updateInterval       time.Duration
-	updateSignal         syscall.Signal
-	registeredGenerators []BlockGenerator
-	registeredConsumers  []ClickEventConsumer
-
-	hasInitialised   bool
-	hasSentFirstLine bool
+type generatorInfo struct {
+	Provider         BlockGenerator
+	HasClickConsumer bool
+	Last      *Block
 }
 
-func New(writer io.Writer, reader io.Reader, updateInterval time.Duration, updateSignal syscall.Signal) *I3bar {
+type I3bar struct {
+	writer         io.Writer
+	reader         io.Reader
+	updateSignal   syscall.Signal
+
+	generators []*generatorInfo
+	tickNumber uint8
+}
+
+func New(writer io.Writer, reader io.Reader, updateSignal syscall.Signal) *I3bar {
 	return &I3bar{
 		writer:         writer,
 		reader:         reader,
-		updateInterval: updateInterval,
 		updateSignal:   updateSignal,
 	}
 }
@@ -44,11 +46,10 @@ func (b *I3bar) Initialise() error {
 		return err
 	}
 
-	if _, err := b.writer.Write(append(capabilities, '\n')); err != nil {
+	if _, err := b.writer.Write(append(capabilities, []byte("\n[\n")...)); err != nil {
 		return err
 	}
 
-	b.hasInitialised = true
 	return nil
 }
 
@@ -59,42 +60,13 @@ var defaultColorSet = &ColorSet{
 	Background: &Color{0x28, 0x28, 0x28},
 }
 
-func (b *I3bar) Emit(generators []BlockGenerator) error {
-	if !b.hasInitialised {
-		if err := b.Initialise(); err != nil {
-			return err
-		}
-	}
-
-	var blocks []*Block
-	for _, generator := range generators {
-		b, err := generator.Block(defaultColorSet)
-		if err != nil {
-			log.Error().Err(err).Str("generator", fmt.Sprintf("%T", generator)).Send()
-			b = &Block{
-				FullText:  "ERROR",
-				TextColor: defaultColorSet.Bad,
-			}
-		}
-		if b == nil {
-			continue
-		}
-		blocks = append(blocks, b)
-	}
-
+func (b *I3bar) Emit(blocks []*Block) error {
 	jsonData, err := json.Marshal(blocks)
 	if err != nil {
 		return err
 	}
 
-	if !b.hasSentFirstLine {
-		jsonData = append([]byte("[\n"), jsonData...)
-		b.hasSentFirstLine = true
-	} else {
-		jsonData = append([]byte{','}, jsonData...)
-	}
-
-	jsonData = append(jsonData, '\n')
+	jsonData = append(jsonData, []byte(",\n")...)
 
 	if _, err := b.writer.Write(jsonData); err != nil {
 		return err
@@ -107,24 +79,25 @@ func (b *I3bar) Emit(generators []BlockGenerator) error {
 // function should not be called after StartLoop is called.
 func (b *I3bar) RegisterBlockGenerator(bg ...BlockGenerator) {
 	for _, bgx := range bg {
-		b.registeredGenerators = append([]BlockGenerator{bgx}, b.registeredGenerators...)
-	}
+		_, hasClickConsumer := bgx.(ClickEventConsumer)
 
-	for _, generator := range bg {
-		if g, ok := generator.(ClickEventConsumer); ok {
-			b.registeredConsumers = append(b.registeredConsumers, g)
-		}
+		metadata := new(generatorInfo)
+		metadata.Provider = bgx
+		metadata.HasClickConsumer = hasClickConsumer
+
+		b.generators = append([]*generatorInfo{metadata}, b.generators...)
 	}
 }
 
 func (b *I3bar) StartLoop() error {
+
 	// The ticker will start after the specified duration, not when we
 	// instantiate it. Circumventing that here by calling Emit now.
-	if err := b.Emit(b.registeredGenerators); err != nil {
+	if err := b.tick(false); err != nil {
 		return err
 	}
 
-	ticker := time.NewTicker(b.updateInterval)
+	ticker := time.NewTicker(time.Second)
 	sigUpdate := make(chan os.Signal, 1)
 	signal.Notify(sigUpdate, os.Signal(b.updateSignal))
 
@@ -135,15 +108,56 @@ func (b *I3bar) StartLoop() error {
 	for {
 		select {
 		case <-sigUpdate:
-			if err := b.Emit(b.registeredGenerators); err != nil {
-				log.Error().Err(err).Msg("could not emit registered generators")
+			if err := b.tick(true); err != nil {
+				log.Error().Err(err).Msg("could not tick")
 			}
 		case <-ticker.C:
-			if err := b.Emit(b.registeredGenerators); err != nil {
-				log.Error().Err(err).Msg("could not emit registered generators")
+			if err := b.tick(false); err != nil {
+				log.Error().Err(err).Msg("could not tick")
 			}
 		}
 	}
+}
+
+func (b *I3bar) tick(override bool) error {
+	var hasChanged bool
+	for _, gen := range b.generators {
+		if override || (gen.Provider.Frequency() == 0 && gen.Last == nil) || (gen.Provider.Frequency() != 0 && b.tickNumber%gen.Provider.Frequency() == 0) {
+			block, err := gen.Provider.Block(defaultColorSet)
+			if err != nil {
+				log.Error().Err(err).Str("generator", fmt.Sprintf("%T", gen.Provider)).Send()
+				block = &Block{
+					FullText:  "ERROR",
+					TextColor: defaultColorSet.Bad,
+				}
+			}
+			if block == nil {
+				block = &Block{
+					FullText:  "MISSING",
+					TextColor: defaultColorSet.Warning,
+				}
+			}
+
+			if block != gen.Last {
+				gen.Last = block
+				hasChanged = true
+			}
+		}
+	}
+
+	if hasChanged {
+		var blocks []*Block
+		for _, gen := range b.generators {
+			blocks = append(blocks, gen.Last)
+		}
+		if err := b.Emit(blocks); err != nil {
+			return err
+		}
+	}
+
+	b.tickNumber += 1
+
+	return nil
 }
 
 func (b *I3bar) consumerLoop(requestBarRefresh func()) {
@@ -166,10 +180,13 @@ func (b *I3bar) consumerLoop(requestBarRefresh func()) {
 			continue // idk what this could be but it's not relevant so BYE!
 		}
 
-		for _, consumer := range b.registeredConsumers {
-			consumerName, consumerInstance := consumer.GetNameAndInstance()
+		for _, consumer := range b.generators {
+			if !consumer.HasClickConsumer {
+				continue
+			}
+			consumerName, consumerInstance := consumer.Provider.GetNameAndInstance()
 			if consumerName == event.Name && (consumerName == "" || consumerInstance == event.Instance) {
-				if consumer.OnClick(event) {
+				if consumer.Provider.(ClickEventConsumer).OnClick(event) {
 					requestBarRefresh()
 				}
 			}
@@ -204,6 +221,9 @@ type ProvidesNameAndInstance interface {
 type BlockGenerator interface {
 	ProvidesNameAndInstance
 	Block(*ColorSet) (*Block, error)
+	// Frequency should return the frequency at which the block is updated, as
+	// "1 per n seconds".
+	Frequency() uint8
 }
 
 type ClickEvent struct {

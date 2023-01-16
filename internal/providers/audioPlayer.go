@@ -38,6 +38,10 @@ func NewAudioPlayer(maxLabelLength int) *AudioPlayer {
 	}
 }
 
+func (g *AudioPlayer) Frequency() uint8 {
+	return 1
+}
+
 type playingAudioInfo struct {
 	Track  string
 	Artist string

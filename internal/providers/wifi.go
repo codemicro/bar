@@ -26,6 +26,10 @@ func NewWiFi(adapter string, okThreshold float32) i3bar.BlockGenerator {
 	}
 }
 
+func (g *WiFi) Frequency() uint8 {
+	return 5
+}
+
 var (
 	// For use with iwconfig
 	essidRegexp       = regexp.MustCompile(`ESSID:(?:"(.+)"|off/any)`)
