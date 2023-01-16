@@ -223,6 +223,9 @@ type BlockGenerator interface {
 	Block(*ColorSet) (*Block, error)
 	// Frequency should return the frequency at which the block is updated, as
 	// "1 per n seconds".
+	//
+	// A frequency of zero means that the Block method will only be called
+	// once, ever.
 	Frequency() uint8
 }
 
