@@ -21,7 +21,7 @@ func NewMemory(okThreshold, warningThreshold float32) i3bar.BlockGenerator {
 	return &Memory{
 		OkThreshold:      okThreshold,
 		WarningThreshold: warningThreshold,
-		name: "memory",
+		name:             "memory",
 	}
 }
 

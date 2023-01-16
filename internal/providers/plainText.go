@@ -16,7 +16,7 @@ func NewPlainText(text string) i3bar.BlockGenerator {
 }
 
 func (g *PlainText) Frequency() uint8 {
-	return 255
+	return 0
 }
 
 func (g *PlainText) Block(*i3bar.ColorSet) (*i3bar.Block, error) {

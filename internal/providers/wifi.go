@@ -37,44 +37,6 @@ var (
 	linkQualityRegexp = regexp.MustCompile(`Link Quality=(\d+\/\d+)`)
 )
 
-func (g *WiFi) getAdapterIPAddress() (string, error) {
-	// call ifconfig
-	output, err := runCommand("ifconfig")
-	if err != nil {
-		return "", err
-	}
-
-	adapters := lo.Filter(
-		strings.Split(string(output), "\n\n"),
-		func(x string, _ int) bool {
-			return x != ""
-		},
-	)
-
-	var ipAddr string
-
-	// parse output
-	// split by \n\n
-	for _, adapter := range adapters {
-		fields := strings.Fields(adapter)
-
-		if !strings.EqualFold(
-			strings.TrimSuffix(fields[0], ":"), g.Adapter,
-		) {
-			continue
-		}
-
-		for i, field := range fields {
-			if field == "inet" {
-				ipAddr = fields[i+1]
-				break
-			}
-		}
-	}
-
-	return ipAddr, nil
-}
-
 func (g *WiFi) getConnectionInfo() (ssid, frequency string, linkQuality float32, err error) {
 	output, err := runCommand("iwconfig")
 	if err != nil {
@@ -117,7 +79,7 @@ func (g *WiFi) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
 	}
 
 	block := &i3bar.Block{
-		Name: g.name,
+		Name:     g.name,
 		Instance: g.Adapter,
 	}
 
