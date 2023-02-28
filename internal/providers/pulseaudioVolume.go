@@ -179,10 +179,22 @@ func (g *PulseaudioVolume) applyVolumeDelta(percentageChange int) error {
 	return err
 }
 
+func (g *PulseaudioVolume) toggleMute() error {
+	// pactl set-sink-mute @DEFAULT_SINK@ toggle
+	sinkName := g.Sink
+	if sinkName == "" {
+		sinkName = "@DEFAULT_SINK@"
+	}
+	_, err := runCommand("pactl", "set-sink-mute", sinkName, "toggle")
+	return err
+}
+
 func (g *PulseaudioVolume) OnClick(event *i3bar.ClickEvent) bool {
 	var err error
 
 	switch event.Button {
+	case i3bar.LeftMouseButton:
+		err = g.toggleMute()
 	case i3bar.MouseWheelScrollUp:
 		err = g.applyVolumeDelta(1)
 	case i3bar.MouseWheelScrollDown:
