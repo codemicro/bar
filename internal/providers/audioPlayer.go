@@ -103,16 +103,18 @@ func (g *AudioPlayer) getInfo() (*playingAudioInfo, error) {
 }
 
 func (g *AudioPlayer) AnimateTicker(x string) string {
-	if len(x) <= g.MaxLabelLen {
-		g.lastText = x
-		return x
-	}
-	mod := x + "    "
+	asRunes := []rune(x)
 
-	if mod != g.lastText {
+	if len(asRunes) <= g.MaxLabelLen {
+		g.lastText = string(asRunes)
+		return string(asRunes)
+	}
+	mod := append(asRunes, []rune("    ")...)
+
+	if sm := string(mod); sm != g.lastText {
 		g.tickerCursor = 0
-		g.lastText = mod
-		return mod[:g.MaxLabelLen]
+		g.lastText = sm
+		return string(mod[:g.MaxLabelLen])
 	}
 
 	g.tickerCursor += g.TickerSteps
@@ -122,10 +124,10 @@ func (g *AudioPlayer) AnimateTicker(x string) string {
 
 	if g.tickerCursor+g.MaxLabelLen > len(mod) {
 		diff := len(mod) - g.tickerCursor
-		return mod[g.tickerCursor:] + mod[:g.MaxLabelLen-diff]
+		return string(mod[g.tickerCursor:]) + string(mod[:g.MaxLabelLen-diff])
 	}
 
-	return mod[g.tickerCursor : g.tickerCursor+g.MaxLabelLen]
+	return string(mod[g.tickerCursor : g.tickerCursor+g.MaxLabelLen])
 }
 
 func (g *AudioPlayer) Block(colors *i3bar.ColorSet) (*i3bar.Block, error) {
