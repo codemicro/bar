@@ -26,7 +26,7 @@ func (g *DateTime) Block(*i3bar.ColorSet) (*i3bar.Block, error) {
 
 	return &i3bar.Block{
 		Name:      g.name,
-		FullText:  cTime.Format("2006-01-02 15:04:05"),
+		FullText:  cTime.Weekday().String()[:2] + cTime.Format(" 2006-01-02 15:04:05"),
 		ShortText: cTime.Format("15:04:05"),
 	}, nil
 }
